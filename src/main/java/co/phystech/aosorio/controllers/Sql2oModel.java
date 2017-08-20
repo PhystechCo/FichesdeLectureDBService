@@ -57,7 +57,8 @@ public class Sql2oModel implements IModel {
 					current.getExtrait(), 
 					current.getAppreciation(), 
 					current.getIsCompleted(),
-					current.getOptional_one());
+					current.getOptional_one(),
+					current.getOptional_two());
 			
 			slf4jLogger.debug("Added comment with UUID: " + commentUuid.toString());
 		}
@@ -95,7 +96,8 @@ public class Sql2oModel implements IModel {
 			String extrait, 
 			String appreciation, 
 			boolean isCompleted, 
-			String optionalOne) {
+			String optionalOne,
+			String optionalTwo) {
 
 		try (Connection conn = sql2o.open()) {
 			UUID commentUuid = uuidGenerator.generate();
@@ -109,7 +111,7 @@ public class Sql2oModel implements IModel {
 				timeStampComplete = new Timestamp(0);
 			}
 			conn.createQuery(
-					"insert into comments(comment_uuid, book_uuid, author, aboutauthor, aboutgenre, aboutcadre, aboutcharacters, resume, extrait, appreciation, optional_one, submission_date, iscompleted, completion_date) VALUES (:comment_uuid, :book_uuid, :author, :aboutauthor, :aboutgenre, :aboutcadre, :aboutcharacters, :resume, :extrait, :appreciation, :optional_one, :submission_date, :iscompleted, :completion_date)")
+					"insert into comments(comment_uuid, book_uuid, author, aboutauthor, aboutgenre, aboutcadre, aboutcharacters, resume, extrait, appreciation, optional_one, optional_two, submission_date, iscompleted, completion_date) VALUES (:comment_uuid, :book_uuid, :author, :aboutauthor, :aboutgenre, :aboutcadre, :aboutcharacters, :resume, :extrait, :appreciation, :optional_one, :optional_two, :submission_date, :iscompleted, :completion_date)")
 					.addParameter("comment_uuid", commentUuid)
 					.addParameter("book_uuid", bookUuid)
 					.addParameter("author", author)
@@ -121,6 +123,7 @@ public class Sql2oModel implements IModel {
 					.addParameter("extrait", extrait)
 					.addParameter("appreciation", appreciation)
 					.addParameter("optional_one", optionalOne)
+					.addParameter("optional_two", optionalTwo)
 					.addParameter("submission_date", timeStampNew )
 					.addParameter("iscompleted", isCompleted)
 					.addParameter("completion_date", timeStampComplete).executeUpdate();
@@ -140,7 +143,8 @@ public class Sql2oModel implements IModel {
 			String appreciation, 
 			boolean isCompleted, 
 			Timestamp submitted_date, 
-			String optionalOne) {
+			String optionalOne,
+			String optionalTwo) {
 
 		try (Connection conn = sql2o.open()) {
 			UUID commentUuid = uuidGenerator.generate();
@@ -152,7 +156,7 @@ public class Sql2oModel implements IModel {
 			}
 			
 			conn.createQuery(
-					"insert into comments(comment_uuid, book_uuid, author, aboutauthor, aboutgenre, aboutcadre, aboutcharacters, resume, extrait, appreciation, optional_one, submission_date, iscompleted, completion_date) VALUES (:comment_uuid, :book_uuid, :author, :aboutauthor, :aboutgenre, :aboutcadre, :aboutcharacters, :resume, :extrait, :appreciation, :optional_one, :submission_date, :iscompleted, :completion_date)")
+					"insert into comments(comment_uuid, book_uuid, author, aboutauthor, aboutgenre, aboutcadre, aboutcharacters, resume, extrait, appreciation, optional_one, optional_two, submission_date, iscompleted, completion_date) VALUES (:comment_uuid, :book_uuid, :author, :aboutauthor, :aboutgenre, :aboutcadre, :aboutcharacters, :resume, :extrait, :appreciation, :optional_one, :optional_two, :submission_date, :iscompleted, :completion_date)")
 					.addParameter("comment_uuid", commentUuid)
 					.addParameter("book_uuid", bookUuid)
 					.addParameter("author", author)
@@ -164,6 +168,7 @@ public class Sql2oModel implements IModel {
 					.addParameter("extrait", extrait)
 					.addParameter("appreciation", appreciation)
 					.addParameter("optional_one", optionalOne)
+					.addParameter("optional_two", optionalTwo)
 					.addParameter("submission_date", submitted_date )
 					.addParameter("iscompleted", isCompleted)
 					.addParameter("completion_date", timeStampComplete).executeUpdate();
@@ -357,7 +362,8 @@ public class Sql2oModel implements IModel {
 							comment.getExtrait(), 
 							comment.getAppreciation(), 
 							comment.getIsCompleted(),
-							comment.getOptional_one());
+							comment.getOptional_one(),
+							comment.getOptional_two());
 				} else { 				
 					slf4jLogger.info("we have to update a comment !!!");
 					updateComment(fiche.getBook().getBook_uuid(), 
@@ -371,7 +377,8 @@ public class Sql2oModel implements IModel {
 							comment.getAppreciation(), 
 							comment.getIsCompleted(),
 							comment.getSubmission_date(),
-							comment.getOptional_one());
+							comment.getOptional_one(),
+							comment.getOptional_two());
 				}
 				
 			}

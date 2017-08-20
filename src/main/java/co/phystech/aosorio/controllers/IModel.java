@@ -39,7 +39,8 @@ public interface IModel {
 			String extrait,
 			String appreciation,
 			boolean isCompleted,
-			String optionalOne);
+			String optionalOne,
+			String optionalTwo);
 	
 	Fiche getFiche(int id, UUID uuid);
 	
