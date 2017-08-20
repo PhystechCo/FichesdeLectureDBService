@@ -141,7 +141,7 @@ public class ModelTest {
 
 		UUID id = model.addComment(acomment.getBook_uuid(), acomment.getAuthor(), acomment.getAboutAuthor(),
 				acomment.getAboutGenre(), acomment.getAboutCadre(), acomment.getAboutCharacters(), acomment.getResume(),
-				acomment.getExtrait(), acomment.getAppreciation(), acomment.getIsCompleted(), "");
+				acomment.getExtrait(), acomment.getAppreciation(), acomment.getIsCompleted(), "", "");
 
 		boolean test = model.existComment(id);
 		
