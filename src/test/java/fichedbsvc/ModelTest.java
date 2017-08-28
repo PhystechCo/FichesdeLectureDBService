@@ -47,6 +47,8 @@ public class ModelTest {
 	public static final String collection = "Business";
 	public static final int pages = 312;
 	public static final String language = "English";
+	public static final String translation = "Ed. Translated from AO";
+	public static final String group = "Barroco";
 
 	public static final String commentAuthor = "Andres Osorio";
 	public static final String aboutAuthor = "Gen Kim and team are experts in DevOps";
@@ -73,20 +75,22 @@ public class ModelTest {
 
 		IModel model = new Sql2oModel(sql2o);
 
-		NewBookPayload abook = new NewBookPayload();
+		NewBookPayload book = new NewBookPayload();
 
-		abook.setTitle(title);
-		abook.setSubTitle(subTitle);
-		abook.setAuthor(author);
-		abook.setYearPub(yearPub);
-		abook.setEditor(editor);
-		abook.setCollection(collection);
-		abook.setPages(pages);
-		abook.setLanguage(language);
+		book.setTitle(title);
+		book.setSubTitle(subTitle);
+		book.setAuthor(author);
+		book.setYearPub(yearPub);
+		book.setEditor(editor);
+		book.setCollection(collection);
+		book.setPages(pages);
+		book.setLanguage(language);
+		book.setTranslation(translation);
+		book.setOptional_one(group);
 
-		UUID id = model.addBook(abook.getTitle(), abook.getSubTitle(), abook.getAuthor(),
-				abook.getYearPub(), abook.getEditor(), abook.getCollection(), abook.getPages(),
-				abook.getLanguage());
+		UUID id = model.addBook(book.getTitle(), book.getSubTitle(), book.getAuthor(),
+				book.getYearPub(), book.getEditor(), book.getCollection(), book.getPages(),
+				book.getLanguage(),book.getTranslation(), book.getOptional_one());
 
 		boolean test = model.existBook(id);
 		
@@ -179,7 +183,9 @@ public class ModelTest {
 		book.setCollection(collection);
 		book.setPages(pages);
 		book.setLanguage(language);
-
+		book.setTranslation(translation);
+		book.setOptional_one(group);
+		
 		List<Comment> comments = new ArrayList<Comment>();
 		comments.add(new Comment());
 
@@ -227,7 +233,9 @@ public class ModelTest {
 		book.setCollection(collection);
 		book.setPages(pages);
 		book.setLanguage(language);
-
+		book.setTranslation(translation);
+		book.setOptional_one(group);
+		
 		List<Comment> comments = new ArrayList<Comment>();
 		
 		Comment acomment = new Comment();
@@ -284,6 +292,8 @@ public class ModelTest {
 		bookJson.addProperty("collection", ModelTest.collection);
 		bookJson.addProperty("pages", ModelTest.pages);
 		bookJson.addProperty("language", ModelTest.language);
+		bookJson.addProperty("translation", ModelTest.translation);
+		bookJson.addProperty("optional_one", ModelTest.group);
 
 		String newBook = bookJson.toString();
 
@@ -329,7 +339,9 @@ public class ModelTest {
 		book.setCollection(collection);
 		book.setPages(pages);
 		book.setLanguage(language);
-
+		book.setTranslation(translation);
+		book.setOptional_one(group);
+		
 		List<Comment> comments = new ArrayList<Comment>();
 		
 		Comment acomment = new Comment();
@@ -410,7 +422,9 @@ public class ModelTest {
 		book.setCollection(collection);
 		book.setPages(pages);
 		book.setLanguage(language);
-
+		book.setTranslation(translation);
+		book.setOptional_one(group);
+		
 		List<Comment> comments = new ArrayList<Comment>();
 		
 		Comment acomment = new Comment();

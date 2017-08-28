@@ -27,7 +27,9 @@ public interface IModel {
 			String editor, 
 			String collection, 
 			int pages,
-			String language);
+			String language,
+			String translation,
+			String optionalOne);
 
 	UUID addComment(UUID bookUuid, 
 			String author, 

@@ -18,6 +18,10 @@ public class NewBookPayload implements IValidable {
 	private String collection;
 	private int pages;
 	private String language;
+	private String translation;
+
+	private String optional_one; 
+	private String optional_two;
 	
 	@Override
 	public boolean isValid() {
@@ -113,6 +117,54 @@ public class NewBookPayload implements IValidable {
 		return "NewBookPayload [title=" + title + ", subTitle=" + subTitle + ", author=" + author + ", yearPub="
 				+ yearPub + ", editor=" + editor + ", collection=" + collection + ", pages=" + pages + ", language="
 				+ language + "]";
+	}
+
+
+	/**
+	 * @return the translation
+	 */
+	public String getTranslation() {
+		return translation;
+	}
+
+
+	/**
+	 * @param translation the translation to set
+	 */
+	public void setTranslation(String translation) {
+		this.translation = translation;
+	}
+
+
+	/**
+	 * @return the optional_one
+	 */
+	public String getOptional_one() {
+		return optional_one;
+	}
+
+
+	/**
+	 * @param optional_one the optional_one to set
+	 */
+	public void setOptional_one(String optional_one) {
+		this.optional_one = optional_one;
+	}
+
+
+	/**
+	 * @return the optional_two
+	 */
+	public String getOptional_two() {
+		return optional_two;
+	}
+
+
+	/**
+	 * @param optional_two the optional_two to set
+	 */
+	public void setOptional_two(String optional_two) {
+		this.optional_two = optional_two;
 	}
 	
 	

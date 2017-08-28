@@ -40,8 +40,16 @@ public class Sql2oModel implements IModel {
 	@Override
 	public UUID addFiche(int id, Book book, List<Comment> comments) {
 
-		UUID bookUuid = addBook(book.getTitle(), book.getSubTitle(), book.getAuthor(), book.getYearPub(),
-				book.getEditor(), book.getCollection(), book.getPages(), book.getLanguage());
+		UUID bookUuid = addBook(book.getTitle(), 
+				book.getSubTitle(), 
+				book.getAuthor(), 
+				book.getYearPub(),
+				book.getEditor(), 
+				book.getCollection(), 
+				book.getPages(), 
+				book.getLanguage(), 
+				book.getTranslation(),
+				book.getOptional_one());
 
 		Iterator<Comment> commentItr = comments.iterator();
 
@@ -69,16 +77,24 @@ public class Sql2oModel implements IModel {
 
 	@Override
 	public UUID addBook(String title, String subTitle, String author, int yearPub, String editor, String collection,
-			int pages, String language) {
+			int pages, String language, String translation, String optionalOne) {
 
 		try (Connection conn = sql2o.beginTransaction()) {
 			UUID postUuid = uuidGenerator.generate();
 			conn.createQuery(
-					"insert into books(book_uuid, title, subtitle, author, yearpub, editor, collection, pages, language) VALUES (:book_uuid, :title, :subtitle, :author, :yearpub, :editor, :collection, :pages, :language)")
-					.addParameter("book_uuid", postUuid).addParameter("title", title).addParameter("subtitle", subTitle)
-					.addParameter("author", author).addParameter("yearpub", yearPub).addParameter("editor", editor)
-					.addParameter("collection", collection).addParameter("pages", pages)
-					.addParameter("language", language).executeUpdate();
+					"insert into books(book_uuid, title, subtitle, author, yearpub, editor, collection, pages, language, translation, optional_one) VALUES (:book_uuid, :title, :subtitle, :author, :yearpub, :editor, :collection, :pages, :language, :translation, :optional_one)")
+					.addParameter("book_uuid", postUuid)
+					.addParameter("title", title)
+					.addParameter("subtitle", subTitle)
+					.addParameter("author", author)
+					.addParameter("yearpub", yearPub)
+					.addParameter("editor", editor)
+					.addParameter("collection", collection)
+					.addParameter("pages", pages)
+					.addParameter("language", language)
+					.addParameter("translation", translation)
+					.addParameter("optional_one", optionalOne)
+					.executeUpdate();
 			conn.commit();
 			return postUuid;
 		}
@@ -326,7 +342,7 @@ public class Sql2oModel implements IModel {
 
 		try (Connection conn = sql2o.open()) {
 			conn.createQuery(
-					"update books set title=:title, subtitle=:subtitle, author=:author, yearpub=:yearpub, editor=:editor, collection=:collection, pages=:pages, language=:language where book_uuid=:book_uuid")
+					"update books set title=:title, subtitle=:subtitle, author=:author, yearpub=:yearpub, editor=:editor, collection=:collection, pages=:pages, language=:language, translation=:translation, optional_one=:optional_one where book_uuid=:book_uuid")
 					.addParameter("book_uuid", fiche.getBook().getBook_uuid())
 					.addParameter("title", fiche.getBook().getTitle())
 					.addParameter("subtitle", fiche.getBook().getSubTitle())
@@ -335,7 +351,10 @@ public class Sql2oModel implements IModel {
 					.addParameter("editor", fiche.getBook().getEditor())
 					.addParameter("collection", fiche.getBook().getCollection())
 					.addParameter("pages", fiche.getBook().getPages())
-					.addParameter("language", fiche.getBook().getLanguage()).executeUpdate();
+					.addParameter("language", fiche.getBook().getLanguage())
+					.addParameter("translation", fiche.getBook().getTranslation())
+					.addParameter("optional_one", fiche.getBook().getOptional_one())	
+					.executeUpdate();
 
 			slf4jLogger.info("updated book");
 			
