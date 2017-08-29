@@ -3,6 +3,7 @@
  */
 package co.phystech.aosorio.controllers;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -14,10 +15,14 @@ import org.slf4j.LoggerFactory;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonArray;
+
 import co.phystech.aosorio.models.Book;
 import co.phystech.aosorio.models.Comment;
 import co.phystech.aosorio.models.Fiche;
 import co.phystech.aosorio.models.NewFichePayload;
+import co.phystech.aosorio.services.CSVReader;
 import co.phystech.aosorio.services.IUuidGenerator;
 import co.phystech.aosorio.services.RandomUuidGenerator;
 
@@ -40,15 +45,8 @@ public class Sql2oModel implements IModel {
 	@Override
 	public UUID addFiche(int id, Book book, List<Comment> comments) {
 
-		UUID bookUuid = addBook(book.getTitle(), 
-				book.getSubTitle(), 
-				book.getAuthor(), 
-				book.getYearPub(),
-				book.getEditor(), 
-				book.getCollection(), 
-				book.getPages(), 
-				book.getLanguage(), 
-				book.getTranslation(),
+		UUID bookUuid = addBook(book.getTitle(), book.getSubTitle(), book.getAuthor(), book.getYearPub(),
+				book.getEditor(), book.getCollection(), book.getPages(), book.getLanguage(), book.getTranslation(),
 				book.getOptional_one());
 
 		Iterator<Comment> commentItr = comments.iterator();
@@ -56,18 +54,11 @@ public class Sql2oModel implements IModel {
 		while (commentItr.hasNext()) {
 
 			Comment current = commentItr.next();
-			UUID commentUuid = addComment(bookUuid, current.getAuthor(), 
-					current.getAboutAuthor(),
-					current.getAboutGenre(), 
-					current.getAboutCadre(), 
-					current.getAboutCharacters(), 
-					current.getResume(),
-					current.getExtrait(), 
-					current.getAppreciation(), 
-					current.getIsCompleted(),
-					current.getOptional_one(),
-					current.getOptional_two());
-			
+			UUID commentUuid = addComment(bookUuid, current.getAuthor(), current.getAboutAuthor(),
+					current.getAboutGenre(), current.getAboutCadre(), current.getAboutCharacters(), current.getResume(),
+					current.getExtrait(), current.getAppreciation(), current.getIsCompleted(),
+					current.getOptional_one(), current.getOptional_two());
+
 			slf4jLogger.debug("Added comment with UUID: " + commentUuid.toString());
 		}
 
@@ -83,18 +74,11 @@ public class Sql2oModel implements IModel {
 			UUID postUuid = uuidGenerator.generate();
 			conn.createQuery(
 					"insert into books(book_uuid, title, subtitle, author, yearpub, editor, collection, pages, language, translation, optional_one) VALUES (:book_uuid, :title, :subtitle, :author, :yearpub, :editor, :collection, :pages, :language, :translation, :optional_one)")
-					.addParameter("book_uuid", postUuid)
-					.addParameter("title", title)
-					.addParameter("subtitle", subTitle)
-					.addParameter("author", author)
-					.addParameter("yearpub", yearPub)
-					.addParameter("editor", editor)
-					.addParameter("collection", collection)
-					.addParameter("pages", pages)
-					.addParameter("language", language)
-					.addParameter("translation", translation)
-					.addParameter("optional_one", optionalOne)
-					.executeUpdate();
+					.addParameter("book_uuid", postUuid).addParameter("title", title).addParameter("subtitle", subTitle)
+					.addParameter("author", author).addParameter("yearpub", yearPub).addParameter("editor", editor)
+					.addParameter("collection", collection).addParameter("pages", pages)
+					.addParameter("language", language).addParameter("translation", translation)
+					.addParameter("optional_one", optionalOne).executeUpdate();
 			conn.commit();
 			return postUuid;
 		}
@@ -102,91 +86,58 @@ public class Sql2oModel implements IModel {
 	}
 
 	@Override
-	public UUID addComment(UUID bookUuid, 
-			String author, 
-			String aboutAuthor, 
-			String aboutGenre, 
-			String aboutCadre,
-			String aboutCharacters, 
-			String resume, 
-			String extrait, 
-			String appreciation, 
-			boolean isCompleted, 
-			String optionalOne,
-			String optionalTwo) {
+	public UUID addComment(UUID bookUuid, String author, String aboutAuthor, String aboutGenre, String aboutCadre,
+			String aboutCharacters, String resume, String extrait, String appreciation, boolean isCompleted,
+			String optionalOne, String optionalTwo) {
 
 		try (Connection conn = sql2o.open()) {
 			UUID commentUuid = uuidGenerator.generate();
-			
+
 			Timestamp timeStampNew = new Timestamp(System.currentTimeMillis());
 			Timestamp timeStampComplete;
-			
-			if ( isCompleted ) {
+
+			if (isCompleted) {
 				timeStampComplete = timeStampNew;
 			} else {
 				timeStampComplete = new Timestamp(0);
 			}
 			conn.createQuery(
 					"insert into comments(comment_uuid, book_uuid, author, aboutauthor, aboutgenre, aboutcadre, aboutcharacters, resume, extrait, appreciation, optional_one, optional_two, submission_date, iscompleted, completion_date) VALUES (:comment_uuid, :book_uuid, :author, :aboutauthor, :aboutgenre, :aboutcadre, :aboutcharacters, :resume, :extrait, :appreciation, :optional_one, :optional_two, :submission_date, :iscompleted, :completion_date)")
-					.addParameter("comment_uuid", commentUuid)
-					.addParameter("book_uuid", bookUuid)
-					.addParameter("author", author)
-					.addParameter("aboutauthor", aboutAuthor)
-					.addParameter("aboutgenre", aboutGenre)
-					.addParameter("aboutcadre", aboutCadre)
-					.addParameter("aboutcharacters", aboutCharacters)
-					.addParameter("resume", resume)
-					.addParameter("extrait", extrait)
-					.addParameter("appreciation", appreciation)
-					.addParameter("optional_one", optionalOne)
-					.addParameter("optional_two", optionalTwo)
-					.addParameter("submission_date", timeStampNew )
-					.addParameter("iscompleted", isCompleted)
+					.addParameter("comment_uuid", commentUuid).addParameter("book_uuid", bookUuid)
+					.addParameter("author", author).addParameter("aboutauthor", aboutAuthor)
+					.addParameter("aboutgenre", aboutGenre).addParameter("aboutcadre", aboutCadre)
+					.addParameter("aboutcharacters", aboutCharacters).addParameter("resume", resume)
+					.addParameter("extrait", extrait).addParameter("appreciation", appreciation)
+					.addParameter("optional_one", optionalOne).addParameter("optional_two", optionalTwo)
+					.addParameter("submission_date", timeStampNew).addParameter("iscompleted", isCompleted)
 					.addParameter("completion_date", timeStampComplete).executeUpdate();
 			return commentUuid;
 		}
 
 	}
-	
-	public UUID updateComment(UUID bookUuid, 
-			String author, 
-			String aboutAuthor, 
-			String aboutGenre, 
-			String aboutCadre,
-			String aboutCharacters, 
-			String resume, 
-			String extrait, 
-			String appreciation, 
-			boolean isCompleted, 
-			Timestamp submitted_date, 
-			String optionalOne,
-			String optionalTwo) {
+
+	public UUID updateComment(UUID bookUuid, String author, String aboutAuthor, String aboutGenre, String aboutCadre,
+			String aboutCharacters, String resume, String extrait, String appreciation, boolean isCompleted,
+			Timestamp submitted_date, String optionalOne, String optionalTwo) {
 
 		try (Connection conn = sql2o.open()) {
 			UUID commentUuid = uuidGenerator.generate();
-			
+
 			Timestamp timeStampComplete = new Timestamp(System.currentTimeMillis());
-						
-			if ( !isCompleted ) {	
+
+			if (!isCompleted) {
 				timeStampComplete = new Timestamp(0);
 			}
-			
+
 			conn.createQuery(
 					"insert into comments(comment_uuid, book_uuid, author, aboutauthor, aboutgenre, aboutcadre, aboutcharacters, resume, extrait, appreciation, optional_one, optional_two, submission_date, iscompleted, completion_date) VALUES (:comment_uuid, :book_uuid, :author, :aboutauthor, :aboutgenre, :aboutcadre, :aboutcharacters, :resume, :extrait, :appreciation, :optional_one, :optional_two, :submission_date, :iscompleted, :completion_date)")
-					.addParameter("comment_uuid", commentUuid)
-					.addParameter("book_uuid", bookUuid)
-					.addParameter("author", author)
-					.addParameter("aboutauthor", aboutAuthor)
-					.addParameter("aboutgenre", aboutGenre)
-					.addParameter("aboutcadre", aboutCadre)
-					.addParameter("aboutcharacters", aboutCharacters)
-					.addParameter("resume", resume)
-					.addParameter("extrait", extrait)
-					.addParameter("appreciation", appreciation)
-					.addParameter("optional_one", optionalOne)
-					.addParameter("optional_two", optionalTwo)
-					.addParameter("submission_date", submitted_date )
-					.addParameter("iscompleted", isCompleted)
+					.addParameter("comment_uuid", commentUuid).addParameter("book_uuid", bookUuid)
+					.addParameter("author", author).addParameter("aboutauthor", aboutAuthor)
+					.addParameter("aboutgenre", aboutGenre).addParameter("aboutcadre", aboutCadre)
+					.addParameter("aboutcharacters", aboutCharacters).addParameter("resume", resume)
+					.addParameter("extrait", extrait).addParameter("appreciation", appreciation)
+					.addParameter("optional_one", optionalOne).addParameter("optional_two", optionalTwo)
+					.addParameter("submission_date", submitted_date).addParameter("iscompleted", isCompleted)
 					.addParameter("completion_date", timeStampComplete).executeUpdate();
 			return commentUuid;
 		}
@@ -231,8 +182,8 @@ public class Sql2oModel implements IModel {
 	@Override
 	public List<Comment> getAllCommentsOn(UUID book) {
 		try (Connection conn = sql2o.open()) {
-			return conn.createQuery("select * from comments where book_uuid=:book_uuid order by submission_date").addParameter("book_uuid", book)
-					.executeAndFetch(Comment.class);
+			return conn.createQuery("select * from comments where book_uuid=:book_uuid order by submission_date")
+					.addParameter("book_uuid", book).executeAndFetch(Comment.class);
 		}
 	}
 
@@ -244,7 +195,7 @@ public class Sql2oModel implements IModel {
 			return books.size() > 0;
 		}
 	}
-	
+
 	@Override
 	public boolean existBook(UUID book) {
 		try (Connection conn = sql2o.open()) {
@@ -253,7 +204,7 @@ public class Sql2oModel implements IModel {
 			return books.size() > 0;
 		}
 	}
-	
+
 	@Override
 	public boolean existComment(UUID comment) {
 		try (Connection conn = sql2o.open()) {
@@ -317,7 +268,7 @@ public class Sql2oModel implements IModel {
 			return true;
 		}
 	}
-	
+
 	@Override
 	public Fiche getFiche(int id, UUID uuid) {
 
@@ -353,55 +304,38 @@ public class Sql2oModel implements IModel {
 					.addParameter("pages", fiche.getBook().getPages())
 					.addParameter("language", fiche.getBook().getLanguage())
 					.addParameter("translation", fiche.getBook().getTranslation())
-					.addParameter("optional_one", fiche.getBook().getOptional_one())	
-					.executeUpdate();
+					.addParameter("optional_one", fiche.getBook().getOptional_one()).executeUpdate();
 
 			slf4jLogger.info("updated book");
-			
+
 			boolean result = deleteComments(fiche.getBook().getBook_uuid());
 
 			if (result) {
 				slf4jLogger.info("deleted comments success");
 			}
-			
+
 			Iterator<Comment> itrComment = fiche.getComments().iterator();
 
 			while (itrComment.hasNext()) {
 				Comment comment = itrComment.next();
-				 
-				if( comment.getSubmission_date() == null) { 
+
+				if (comment.getSubmission_date() == null) {
 					slf4jLogger.info("updateFiche> we have a new comment!!!");
-					addComment(fiche.getBook().getBook_uuid(), 
-							comment.getAuthor(), 
-							comment.getAboutAuthor(),
-							comment.getAboutGenre(), 
-							comment.getAboutGenre(), 
-							comment.getAboutCharacters(),
-							comment.getResume(), 
-							comment.getExtrait(), 
-							comment.getAppreciation(), 
-							comment.getIsCompleted(),
-							comment.getOptional_one(),
-							comment.getOptional_two());
-				} else { 				
+					addComment(fiche.getBook().getBook_uuid(), comment.getAuthor(), comment.getAboutAuthor(),
+							comment.getAboutGenre(), comment.getAboutGenre(), comment.getAboutCharacters(),
+							comment.getResume(), comment.getExtrait(), comment.getAppreciation(),
+							comment.getIsCompleted(), comment.getOptional_one(), comment.getOptional_two());
+				} else {
 					slf4jLogger.info("we have to update a comment !!!");
-					updateComment(fiche.getBook().getBook_uuid(), 
-							comment.getAuthor(), 
-							comment.getAboutAuthor(),
-							comment.getAboutGenre(), 
-							comment.getAboutGenre(), 
-							comment.getAboutCharacters(),
-							comment.getResume(), 
-							comment.getExtrait(), 
-							comment.getAppreciation(), 
-							comment.getIsCompleted(),
-							comment.getSubmission_date(),
-							comment.getOptional_one(),
+					updateComment(fiche.getBook().getBook_uuid(), comment.getAuthor(), comment.getAboutAuthor(),
+							comment.getAboutGenre(), comment.getAboutGenre(), comment.getAboutCharacters(),
+							comment.getResume(), comment.getExtrait(), comment.getAppreciation(),
+							comment.getIsCompleted(), comment.getSubmission_date(), comment.getOptional_one(),
 							comment.getOptional_two());
 				}
-				
+
 			}
-			
+
 			slf4jLogger.info("updated comments success");
 
 		} catch (Exception ex) {
@@ -412,6 +346,39 @@ public class Sql2oModel implements IModel {
 		return true;
 	}
 
-	
+	@Override
+	public int createFichesFromCSV(String fileName) throws IOException {
+
+		int nfiches = 0;
+		CSVReader reader = new CSVReader(fileName);
+		
+		try {
+
+			ObjectMapper mapper = new ObjectMapper();
+
+			JsonArray ficheData = (JsonArray) reader.readFile();
+
+			for (int i = 0; i < ficheData.size(); i++) {
+
+				NewFichePayload newFiche = mapper.readValue(ficheData.get(i).toString(), NewFichePayload.class);
+
+				if (!newFiche.isValid()) {
+					slf4jLogger.info("Invalid body object");
+					continue;
+				}
+
+				UUID id = addFiche(newFiche.getId(), newFiche.getBook(), newFiche.getComments());
+
+				slf4jLogger.info("New fiche added: " + String.valueOf(id));
+				nfiches++;
+			}
+
+		} catch (IOException e) {
+			throw e;
+		}
+
+		return nfiches;
+
+	}
 
 }

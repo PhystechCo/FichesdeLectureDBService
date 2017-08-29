@@ -6,6 +6,8 @@ package co.phystech.aosorio.controllers;
 import java.io.IOException;
 import java.util.UUID;
 
+import javax.servlet.ServletException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sql2o.Sql2o;
@@ -16,6 +18,7 @@ import co.phystech.aosorio.config.Constants;
 import co.phystech.aosorio.models.BackendMessage;
 import co.phystech.aosorio.models.Fiche;
 import co.phystech.aosorio.models.NewFichePayload;
+import co.phystech.aosorio.services.FileSvc;
 import spark.Request;
 import spark.Response;
 
@@ -181,6 +184,40 @@ public class FicheController {
 		pResponse.type("application/json");
 
 		return returnMessage.getOkMessage(String.valueOf(status));
+
+	}
+	
+	public static Object uploadFiches(Request pRequest, Response pResponse) {
+
+		Sql2o sql2o = SqlController.getInstance().getAccess();
+
+		BackendMessage returnMessage = new BackendMessage();
+
+		pResponse.type("application/json");
+
+		try {
+
+			String fileName = FileSvc.uploadFile(pRequest);
+			
+			slf4jLogger.info(fileName);
+			
+			IModel model = new Sql2oModel(sql2o);
+			
+			model.createFichesFromCSV(fileName);
+			
+			pResponse.status(200);
+			
+			FileSvc.deleteFile(fileName);
+			
+			return returnMessage.getOkMessage(String.valueOf(1));
+
+		} catch (IOException | ServletException jpe) {
+			
+			slf4jLogger.debug("Problem adding fiches");
+			pResponse.status(Constants.HTTP_BAD_REQUEST);
+			return returnMessage.getNotOkMessage("Problem adding fiches");
+
+		} 
 
 	}
 

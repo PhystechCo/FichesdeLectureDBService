@@ -41,7 +41,7 @@ public class Main {
 		// .. Authorization
 		if (args.length == 0)
 			before(Routes.USERS + "*", AuthorizeSvc::authorizeUser);
-		
+
 		// ... Fiches
 
 		post(Routes.FICHES, FicheController::createFiche, GeneralSvc.json());
@@ -54,7 +54,11 @@ public class Main {
 
 		delete(Routes.FICHES + "/:id/:uuid", FicheController::deleteFiche, GeneralSvc.json());
 
-		delete(Routes.FICHES + "all", FicheController::deleteAll, GeneralSvc.json());
+		//---delete(Routes.FICHES + "all", FicheController::deleteAll, GeneralSvc.json());
+
+		//.... Fiche uploader
+
+		post(Routes.FICHES + "/uploadfiche", FicheController::uploadFiches, GeneralSvc.json());
 
 		// ... Books
 

@@ -3,6 +3,7 @@
  */
 package co.phystech.aosorio.controllers;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,6 +44,8 @@ public interface IModel {
 			boolean isCompleted,
 			String optionalOne,
 			String optionalTwo);
+	
+	int createFichesFromCSV(String fileName) throws IOException;
 	
 	Fiche getFiche(int id, UUID uuid);
 	

@@ -3,8 +3,11 @@
  */
 package co.phystech.aosorio.services;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -33,4 +36,41 @@ public class GeneralSvc {
 		return GeneralSvc::dataToJson;
 	}
 
+	/** Setup a temporary area to store files
+	 * @param target
+	 * @return absolute path to temporary local directory
+	 */
+	public static String setupTmpDir( String target ) {
+		
+		ArrayList<String> localStorageEnv = new ArrayList<String>();
+
+		localStorageEnv.add("LOCAL_TMP_PATH_ENV");
+		localStorageEnv.add("TMP");
+		localStorageEnv.add("HOME");
+
+		Iterator<String> itrPath = localStorageEnv.iterator();
+
+		boolean found = false;
+
+		File tmpDir = null;
+		
+		while (itrPath.hasNext()) {
+			String testPath = itrPath.next();
+			String value = System.getenv(testPath);
+			if (value != null) {
+				tmpDir = new File(value + target);
+				tmpDir.mkdir();
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			tmpDir = new File(target);			
+		}
+			
+		return tmpDir.getAbsolutePath();
+		
+	}
+	
 }
