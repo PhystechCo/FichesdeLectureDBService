@@ -6,8 +6,11 @@ package co.phystech.aosorio.controllers;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -351,7 +354,7 @@ public class Sql2oModel implements IModel {
 
 		int nfiches = 0;
 		CSVReader reader = new CSVReader(fileName);
-		
+
 		try {
 
 			ObjectMapper mapper = new ObjectMapper();
@@ -360,6 +363,8 @@ public class Sql2oModel implements IModel {
 
 			for (int i = 0; i < ficheData.size(); i++) {
 
+				UUID id;
+
 				NewFichePayload newFiche = mapper.readValue(ficheData.get(i).toString(), NewFichePayload.class);
 
 				if (!newFiche.isValid()) {
@@ -367,10 +372,15 @@ public class Sql2oModel implements IModel {
 					continue;
 				}
 
-				UUID id = addFiche(newFiche.getId(), newFiche.getBook(), newFiche.getComments());
+				if (!existFiche(newFiche)) {
+					id = addFiche(newFiche.getId(), newFiche.getBook(), newFiche.getComments());
+					slf4jLogger.info("New fiche added: " + String.valueOf(id));
+					nfiches++;
+				} else {
+					id = new UUID(0, 0);
+					slf4jLogger.info("Fiche already exist - not added");
+				}
 
-				slf4jLogger.info("New fiche added: " + String.valueOf(id));
-				nfiches++;
 			}
 
 		} catch (IOException e) {
@@ -379,6 +389,42 @@ public class Sql2oModel implements IModel {
 
 		return nfiches;
 
+	}
+
+	@Override
+	public boolean existFiche(NewFichePayload fiche) {
+
+		Book book = fiche.getBook();
+
+		Map<String, String> items = new HashMap<String, String>();
+
+		items.put("title", book.getTitle());
+		items.put("author", book.getAuthor());
+		items.put("yearpub", String.valueOf(book.getYearPub()));
+		items.put("editor", book.getEditor());
+
+		StringBuilder query = new StringBuilder("select * from books where ");
+
+		items.values().removeIf(Objects::isNull);
+
+		List<String> list = new ArrayList<String>();
+
+		items.forEach((key, value) -> {
+			list.add(" " + key + " = " + "\'" + value + "\' ");
+		});
+
+		query.append(String.join("and", list));
+
+		slf4jLogger.info(query.toString());
+
+		try (Connection conn = sql2o.open()) {
+			List<Book> results = conn.createQuery(query.toString()).executeAndFetch(Book.class);
+
+			if (results.size() > 0)
+				return true;
+		}
+
+		return false;
 	}
 
 }

@@ -56,8 +56,15 @@ public class FicheController {
 
 			slf4jLogger.info(newFiche.toString());
 
-			UUID id = model.addFiche(newFiche.getId(), newFiche.getBook(), newFiche.getComments());
-
+			UUID id;
+			
+			if ( !model.existFiche(newFiche))			
+				id = model.addFiche(newFiche.getId(), newFiche.getBook(), newFiche.getComments());
+			else {
+				id = new UUID(0,0);
+				slf4jLogger.info("Fiche already exist - not added");
+			}
+				
 			pResponse.status(200);
 
 			return returnMessage.getOkMessage(String.valueOf(id));

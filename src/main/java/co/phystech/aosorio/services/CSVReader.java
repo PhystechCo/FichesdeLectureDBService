@@ -25,7 +25,7 @@ import com.google.gson.JsonObject;
  * Implementation: Using regex to split correctly the data. Data is return as a
  * Json Array
  * 
- * Created: Feb 29, 2016 Modified: 29/08/2017
+ * Created: Feb 29, 2016 Modified and adapted: 29/08/2017
  * 
  */
 

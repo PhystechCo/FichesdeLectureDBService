@@ -59,6 +59,8 @@ public interface IModel {
 	
 	boolean updateFiche(NewFichePayload fiche);
 	
+	boolean existFiche(NewFichePayload fiche);
+	
 	boolean existFiche(UUID book);
 	
 	boolean existBook(UUID book);
