@@ -38,5 +38,20 @@ public class ServiceTest {
 		assertTrue(json.has("books"));
 		
 	}
+	
+	@Test
+	public void countGroupTest() {
+		
+		//Test the book counter service
+		Request pRequest = null;
+		Response pResponse = null;
+		
+		JsonObject json = (JsonObject) StatisticsSvc.getAdvancedStats(pRequest, pResponse);
+				
+		slf4jLogger.info("Groups " + json.get("groups"));
+
+		assertTrue(true);
+		
+	}
 
 }
