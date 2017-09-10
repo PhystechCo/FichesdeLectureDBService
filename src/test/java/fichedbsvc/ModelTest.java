@@ -49,6 +49,8 @@ public class ModelTest {
 	public static final String language = "English";
 	public static final String translation = "Ed. Translated from AO";
 	public static final String group = "Barroco";
+	public static final String nationality = "American";
+	public static final String period = "1980:2000";
 
 	public static final String commentAuthor = "Andres Osorio";
 	public static final String aboutAuthor = "Gen Kim and team are experts in DevOps";
@@ -58,7 +60,9 @@ public class ModelTest {
 	public static final String resume = "Bill is asked to take charge of IT operations and improve the IT department";
 	public static final String extrait = "DevOps";
 	public static final String appreciation = "Great novel; very interesting";
-
+	public static final String commentText = "No comments, great book";
+	public static final String otherDetails = "This book has been edited also as a graphic novel";
+	
 	@Test
 	public void bookCreationTest() {
 		
@@ -87,16 +91,21 @@ public class ModelTest {
 		book.setLanguage(language);
 		book.setTranslation(translation);
 		book.setOptional_one(group);
+		book.setAuthor_nationality(nationality);
+		book.setAuthor_period(period);
 
 		UUID id = model.addBook(book.getTitle(), book.getSubTitle(), book.getAuthor(),
 				book.getYearPub(), book.getEditor(), book.getCollection(), book.getPages(),
-				book.getLanguage(),book.getTranslation(), book.getOptional_one());
+				book.getLanguage(),book.getTranslation(), book.getOptional_one(), 
+				book.getAuthor_nationality(), book.getAuthor_period());
 
 		boolean test = model.existBook(id);
 		
 		assertTrue(test);
 		
 		model.deleteBook(id);
+		
+		slf4jLogger.info("bookCreationTest> success");
 		
 	}
 
@@ -127,6 +136,8 @@ public class ModelTest {
 		acomment.setExtrait(extrait);
 		acomment.setAppreciation(appreciation);
 		acomment.setIsCompleted(false);
+		acomment.setComment_text(commentText);
+		acomment.setOther_details(otherDetails);
 
 		List<Book> books = new ArrayList<Book>();
 		books = model.getAllBooks();
@@ -145,13 +156,15 @@ public class ModelTest {
 
 		UUID id = model.addComment(acomment.getBook_uuid(), acomment.getAuthor(), acomment.getAboutAuthor(),
 				acomment.getAboutGenre(), acomment.getAboutCadre(), acomment.getAboutCharacters(), acomment.getResume(),
-				acomment.getExtrait(), acomment.getAppreciation(), acomment.getIsCompleted(), "", "");
+				acomment.getExtrait(), acomment.getAppreciation(), acomment.getIsCompleted(), "", "","","");
 
 		boolean test = model.existComment(id);
 		
 		assertTrue(test);
 		
 		model.deleteComment(id);
+		
+		slf4jLogger.info("commentCreationTest> success");
 		
 	}
 
@@ -185,6 +198,8 @@ public class ModelTest {
 		book.setLanguage(language);
 		book.setTranslation(translation);
 		book.setOptional_one(group);
+		book.setAuthor_nationality(nationality);
+		book.setAuthor_period(period);
 		
 		List<Comment> comments = new ArrayList<Comment>();
 		comments.add(new Comment());
@@ -202,6 +217,8 @@ public class ModelTest {
 		assertTrue(test);
 		
 		model.deleteFiche(id);
+		
+		slf4jLogger.info("ficheCreationTest> success");
 
 	}
 	
@@ -235,6 +252,8 @@ public class ModelTest {
 		book.setLanguage(language);
 		book.setTranslation(translation);
 		book.setOptional_one(group);
+		book.setAuthor_nationality(nationality);
+		book.setAuthor_period(period);
 		
 		List<Comment> comments = new ArrayList<Comment>();
 		
@@ -274,6 +293,8 @@ public class ModelTest {
 		assertTrue(test);
 
 		model.deleteFiche(id);
+		
+		slf4jLogger.info("ficheUpdateTest> done");
 
 	}
 
@@ -294,6 +315,8 @@ public class ModelTest {
 		bookJson.addProperty("language", ModelTest.language);
 		bookJson.addProperty("translation", ModelTest.translation);
 		bookJson.addProperty("optional_one", ModelTest.group);
+		bookJson.addProperty("author_nationality",ModelTest.nationality);
+		bookJson.addProperty("author_period", ModelTest.period);
 
 		String newBook = bookJson.toString();
 
@@ -321,7 +344,9 @@ public class ModelTest {
 		}
 
 		assertTrue(result);
-
+		
+		slf4jLogger.info("bookParsingTest> done");
+		
 	}
 
 	@Test
@@ -341,6 +366,8 @@ public class ModelTest {
 		book.setLanguage(language);
 		book.setTranslation(translation);
 		book.setOptional_one(group);
+		book.setAuthor_nationality(nationality);
+		book.setAuthor_period(period);
 		
 		List<Comment> comments = new ArrayList<Comment>();
 		
@@ -355,6 +382,8 @@ public class ModelTest {
 		acomment.setExtrait(extrait);
 		acomment.setAppreciation(appreciation);
 		acomment.setIsCompleted(false);
+		acomment.setComment_text(commentText);
+		acomment.setOther_details(otherDetails);
 		
 		comments.add(acomment);
 		
@@ -391,6 +420,8 @@ public class ModelTest {
 		}
 
 		assertTrue(result);
+		
+		slf4jLogger.info("ficheParsingTest> done");
 
 	}
 	
@@ -473,7 +504,7 @@ public class ModelTest {
 
 		model.deleteFiche(id);
 		
-		
+		slf4jLogger.info("ficheUpdateDatesTest> done");
 		
 	}
 	

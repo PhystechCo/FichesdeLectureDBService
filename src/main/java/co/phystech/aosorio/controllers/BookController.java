@@ -57,7 +57,9 @@ public class BookController {
 					creation.getPages(), 
 					creation.getLanguage(),
 					creation.getTranslation(),
-					creation.getOptional_one());
+					creation.getOptional_one(),
+					creation.getAuthor_nationality(),
+					creation.getAuthor_period());
 			
 			pResponse.status(200);
 			pResponse.type("application/json");

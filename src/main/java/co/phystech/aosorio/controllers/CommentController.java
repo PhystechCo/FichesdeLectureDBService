@@ -55,7 +55,9 @@ private final static Logger slf4jLogger = LoggerFactory.getLogger(CommentControl
 					comment.getAppreciation(),
 					comment.getIsCompleted(),
 					comment.getOptional_one(),
-					comment.getOptional_two());
+					comment.getOptional_two(),
+					comment.getComment_text(),
+					comment.getOther_details());
 			
 			pResponse.status(200);
 					

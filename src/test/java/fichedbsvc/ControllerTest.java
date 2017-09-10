@@ -154,6 +154,8 @@ public class ControllerTest {
 			bookJson.addProperty("collection", ModelTest.collection);
 			bookJson.addProperty("pages", ModelTest.pages);
 			bookJson.addProperty("language", ModelTest.language);
+			bookJson.addProperty("author_nationality", ModelTest.nationality);
+			bookJson.addProperty("author_period", ModelTest.period);
 
 			String newBook = bookJson.toString();
 
@@ -233,21 +235,25 @@ public class ControllerTest {
 			book.setCollection(ModelTest.collection);
 			book.setPages(ModelTest.pages);
 			book.setLanguage(ModelTest.language);
-
+			book.setAuthor_nationality(ModelTest.nationality);
+			book.setAuthor_period(ModelTest.period);
+			
 			List<Comment> comments = new ArrayList<Comment>();
 
-			Comment commment = new Comment();
+			Comment comment = new Comment();
 
-			commment.setAuthor(ModelTest.commentAuthor);
-			commment.setAboutAuthor(ModelTest.aboutAuthor);
-			commment.setAboutGenre(ModelTest.aboutGenre);
-			commment.setAboutCadre(ModelTest.aboutCadre);
-			commment.setAboutCharacters(ModelTest.aboutCharacters);
-			commment.setResume(ModelTest.resume);
-			commment.setExtrait(ModelTest.extrait);
-			commment.setAppreciation(ModelTest.appreciation);
+			comment.setAuthor(ModelTest.commentAuthor);
+			comment.setAboutAuthor(ModelTest.aboutAuthor);
+			comment.setAboutGenre(ModelTest.aboutGenre);
+			comment.setAboutCadre(ModelTest.aboutCadre);
+			comment.setAboutCharacters(ModelTest.aboutCharacters);
+			comment.setResume(ModelTest.resume);
+			comment.setExtrait(ModelTest.extrait);
+			comment.setAppreciation(ModelTest.appreciation);
+			comment.setComment_text(ModelTest.commentText);
+			comment.setOther_details(ModelTest.otherDetails);
 
-			comments.add(commment);
+			comments.add(comment);
 
 			Gson gson = new GsonBuilder().create();
 

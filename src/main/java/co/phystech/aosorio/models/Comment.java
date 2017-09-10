@@ -28,6 +28,9 @@ public class Comment {
 	private Timestamp submission_date;
 	private Timestamp completion_date;
 
+	private String comment_text;
+	private String other_details;
+	
 	private String optional_one;
 	private String optional_two;
 	private String optional_three;
@@ -203,6 +206,34 @@ public class Comment {
 	 */
 	public void setOptional_four(String optional_four) {
 		this.optional_four = optional_four;
+	}
+
+	/**
+	 * @return the comment_text
+	 */
+	public String getComment_text() {
+		return comment_text;
+	}
+
+	/**
+	 * @param comment_text the comment_text to set
+	 */
+	public void setComment_text(String comment_text) {
+		this.comment_text = comment_text;
+	}
+
+	/**
+	 * @return the other_details
+	 */
+	public String getOther_details() {
+		return other_details;
+	}
+
+	/**
+	 * @param other_details the other_details to set
+	 */
+	public void setOther_details(String other_details) {
+		this.other_details = other_details;
 	}
 	
 	

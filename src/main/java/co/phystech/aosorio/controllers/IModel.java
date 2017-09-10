@@ -30,7 +30,9 @@ public interface IModel {
 			int pages,
 			String language,
 			String translation,
-			String optionalOne);
+			String optionalOne,
+			String nationality,
+			String period);
 
 	UUID addComment(UUID bookUuid, 
 			String author, 
@@ -43,7 +45,9 @@ public interface IModel {
 			String appreciation,
 			boolean isCompleted,
 			String optionalOne,
-			String optionalTwo);
+			String optionalTwo,
+			String commentText,
+			String otherDetails);
 	
 	int createFichesFromCSV(String fileName) throws IOException;
 	

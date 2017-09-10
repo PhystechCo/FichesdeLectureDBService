@@ -50,7 +50,7 @@ public class Sql2oModel implements IModel {
 
 		UUID bookUuid = addBook(book.getTitle(), book.getSubTitle(), book.getAuthor(), book.getYearPub(),
 				book.getEditor(), book.getCollection(), book.getPages(), book.getLanguage(), book.getTranslation(),
-				book.getOptional_one());
+				book.getOptional_one(), book.getAuthor_nationality(), book.getAuthor_period());
 
 		Iterator<Comment> commentItr = comments.iterator();
 
@@ -60,7 +60,8 @@ public class Sql2oModel implements IModel {
 			UUID commentUuid = addComment(bookUuid, current.getAuthor(), current.getAboutAuthor(),
 					current.getAboutGenre(), current.getAboutCadre(), current.getAboutCharacters(), current.getResume(),
 					current.getExtrait(), current.getAppreciation(), current.getIsCompleted(),
-					current.getOptional_one(), current.getOptional_two());
+					current.getOptional_one(), current.getOptional_two(), current.getComment_text(),
+					current.getOther_details());
 
 			slf4jLogger.debug("Added comment with UUID: " + commentUuid.toString());
 		}
@@ -71,17 +72,24 @@ public class Sql2oModel implements IModel {
 
 	@Override
 	public UUID addBook(String title, String subTitle, String author, int yearPub, String editor, String collection,
-			int pages, String language, String translation, String optionalOne) {
+			int pages, String language, String translation, String optionalOne, String nationality, String period) {
 
 		try (Connection conn = sql2o.beginTransaction()) {
 			UUID postUuid = uuidGenerator.generate();
 			conn.createQuery(
-					"insert into books(book_uuid, title, subtitle, author, yearpub, editor, collection, pages, language, translation, optional_one) VALUES (:book_uuid, :title, :subtitle, :author, :yearpub, :editor, :collection, :pages, :language, :translation, :optional_one)")
+					"insert into books(book_uuid, title, subtitle, author, yearpub, editor, collection, pages, language, translation, optional_one, author_nationality, author_period) VALUES (:book_uuid, :title, :subtitle, :author, :yearpub, :editor, :collection, :pages, :language, :translation, :optional_one, :author_nationality, :author_period)")
 					.addParameter("book_uuid", postUuid).addParameter("title", title).addParameter("subtitle", subTitle)
-					.addParameter("author", author).addParameter("yearpub", yearPub).addParameter("editor", editor)
-					.addParameter("collection", collection).addParameter("pages", pages)
-					.addParameter("language", language).addParameter("translation", translation)
-					.addParameter("optional_one", optionalOne).executeUpdate();
+					.addParameter("author", author)
+					.addParameter("yearpub", yearPub)
+					.addParameter("editor", editor)
+					.addParameter("collection", collection)
+					.addParameter("pages", pages)
+					.addParameter("language", language)
+					.addParameter("translation", translation)
+					.addParameter("optional_one", optionalOne)
+					.addParameter("author_nationality", nationality)
+					.addParameter("author_period", period)
+					.executeUpdate();
 			conn.commit();
 			return postUuid;
 		}
@@ -91,7 +99,7 @@ public class Sql2oModel implements IModel {
 	@Override
 	public UUID addComment(UUID bookUuid, String author, String aboutAuthor, String aboutGenre, String aboutCadre,
 			String aboutCharacters, String resume, String extrait, String appreciation, boolean isCompleted,
-			String optionalOne, String optionalTwo) {
+			String optionalOne, String optionalTwo, String commentText, String otherDetails) {
 
 		try (Connection conn = sql2o.open()) {
 			UUID commentUuid = uuidGenerator.generate();
@@ -105,15 +113,24 @@ public class Sql2oModel implements IModel {
 				timeStampComplete = new Timestamp(0);
 			}
 			conn.createQuery(
-					"insert into comments(comment_uuid, book_uuid, author, aboutauthor, aboutgenre, aboutcadre, aboutcharacters, resume, extrait, appreciation, optional_one, optional_two, submission_date, iscompleted, completion_date) VALUES (:comment_uuid, :book_uuid, :author, :aboutauthor, :aboutgenre, :aboutcadre, :aboutcharacters, :resume, :extrait, :appreciation, :optional_one, :optional_two, :submission_date, :iscompleted, :completion_date)")
+					"insert into comments(comment_uuid, book_uuid, author, aboutauthor, aboutgenre, aboutcadre, aboutcharacters, resume, extrait, appreciation, optional_one, optional_two, submission_date, iscompleted, completion_date, comment_text, other_details) VALUES (:comment_uuid, :book_uuid, :author, :aboutauthor, :aboutgenre, :aboutcadre, :aboutcharacters, :resume, :extrait, :appreciation, :optional_one, :optional_two, :submission_date, :iscompleted, :completion_date, :comment_text, :other_details)")
 					.addParameter("comment_uuid", commentUuid).addParameter("book_uuid", bookUuid)
-					.addParameter("author", author).addParameter("aboutauthor", aboutAuthor)
-					.addParameter("aboutgenre", aboutGenre).addParameter("aboutcadre", aboutCadre)
-					.addParameter("aboutcharacters", aboutCharacters).addParameter("resume", resume)
-					.addParameter("extrait", extrait).addParameter("appreciation", appreciation)
-					.addParameter("optional_one", optionalOne).addParameter("optional_two", optionalTwo)
-					.addParameter("submission_date", timeStampNew).addParameter("iscompleted", isCompleted)
-					.addParameter("completion_date", timeStampComplete).executeUpdate();
+					.addParameter("author", author)
+					.addParameter("aboutauthor", aboutAuthor)
+					.addParameter("aboutgenre", aboutGenre)
+					.addParameter("aboutcadre", aboutCadre)
+					.addParameter("aboutcharacters", aboutCharacters)
+					.addParameter("resume", resume)
+					.addParameter("extrait", extrait)
+					.addParameter("appreciation", appreciation)
+					.addParameter("optional_one", optionalOne)
+					.addParameter("optional_two", optionalTwo)
+					.addParameter("submission_date", timeStampNew)
+					.addParameter("iscompleted", isCompleted)
+					.addParameter("completion_date", timeStampComplete)
+					.addParameter("comment_text", commentText)
+					.addParameter("other_details", otherDetails)
+					.executeUpdate();
 			return commentUuid;
 		}
 
@@ -121,7 +138,7 @@ public class Sql2oModel implements IModel {
 
 	public UUID updateComment(UUID bookUuid, String author, String aboutAuthor, String aboutGenre, String aboutCadre,
 			String aboutCharacters, String resume, String extrait, String appreciation, boolean isCompleted,
-			Timestamp submitted_date, String optionalOne, String optionalTwo) {
+			Timestamp submitted_date, String optionalOne, String optionalTwo, String commentText, String otherDetails) {
 
 		try (Connection conn = sql2o.open()) {
 			UUID commentUuid = uuidGenerator.generate();
@@ -133,15 +150,25 @@ public class Sql2oModel implements IModel {
 			}
 
 			conn.createQuery(
-					"insert into comments(comment_uuid, book_uuid, author, aboutauthor, aboutgenre, aboutcadre, aboutcharacters, resume, extrait, appreciation, optional_one, optional_two, submission_date, iscompleted, completion_date) VALUES (:comment_uuid, :book_uuid, :author, :aboutauthor, :aboutgenre, :aboutcadre, :aboutcharacters, :resume, :extrait, :appreciation, :optional_one, :optional_two, :submission_date, :iscompleted, :completion_date)")
-					.addParameter("comment_uuid", commentUuid).addParameter("book_uuid", bookUuid)
-					.addParameter("author", author).addParameter("aboutauthor", aboutAuthor)
-					.addParameter("aboutgenre", aboutGenre).addParameter("aboutcadre", aboutCadre)
-					.addParameter("aboutcharacters", aboutCharacters).addParameter("resume", resume)
-					.addParameter("extrait", extrait).addParameter("appreciation", appreciation)
-					.addParameter("optional_one", optionalOne).addParameter("optional_two", optionalTwo)
-					.addParameter("submission_date", submitted_date).addParameter("iscompleted", isCompleted)
-					.addParameter("completion_date", timeStampComplete).executeUpdate();
+					"insert into comments(comment_uuid, book_uuid, author, aboutauthor, aboutgenre, aboutcadre, aboutcharacters, resume, extrait, appreciation, optional_one, optional_two, submission_date, iscompleted, completion_date, comment_text, other_details) VALUES (:comment_uuid, :book_uuid, :author, :aboutauthor, :aboutgenre, :aboutcadre, :aboutcharacters, :resume, :extrait, :appreciation, :optional_one, :optional_two, :submission_date, :iscompleted, :completion_date, :comment_text, :other_details)")
+					.addParameter("comment_uuid", commentUuid)
+					.addParameter("book_uuid", bookUuid)
+					.addParameter("author", author)
+					.addParameter("aboutauthor", aboutAuthor)
+					.addParameter("aboutgenre", aboutGenre)
+					.addParameter("aboutcadre", aboutCadre)
+					.addParameter("aboutcharacters", aboutCharacters)
+					.addParameter("resume", resume)
+					.addParameter("extrait", extrait)
+					.addParameter("appreciation", appreciation)
+					.addParameter("optional_one", optionalOne)
+					.addParameter("optional_two", optionalTwo)
+					.addParameter("submission_date", submitted_date)
+					.addParameter("iscompleted", isCompleted)
+					.addParameter("completion_date", timeStampComplete)
+					.addParameter("comment_text", commentText)
+					.addParameter("other_details", otherDetails)
+					.executeUpdate();
 			return commentUuid;
 		}
 
@@ -296,7 +323,7 @@ public class Sql2oModel implements IModel {
 
 		try (Connection conn = sql2o.open()) {
 			conn.createQuery(
-					"update books set title=:title, subtitle=:subtitle, author=:author, yearpub=:yearpub, editor=:editor, collection=:collection, pages=:pages, language=:language, translation=:translation, optional_one=:optional_one where book_uuid=:book_uuid")
+					"update books set title=:title, subtitle=:subtitle, author=:author, yearpub=:yearpub, editor=:editor, collection=:collection, pages=:pages, language=:language, translation=:translation, optional_one=:optional_one, author_nationality=:author_nationality, author_period=:author_period where book_uuid=:book_uuid")
 					.addParameter("book_uuid", fiche.getBook().getBook_uuid())
 					.addParameter("title", fiche.getBook().getTitle())
 					.addParameter("subtitle", fiche.getBook().getSubTitle())
@@ -307,7 +334,10 @@ public class Sql2oModel implements IModel {
 					.addParameter("pages", fiche.getBook().getPages())
 					.addParameter("language", fiche.getBook().getLanguage())
 					.addParameter("translation", fiche.getBook().getTranslation())
-					.addParameter("optional_one", fiche.getBook().getOptional_one()).executeUpdate();
+					.addParameter("optional_one", fiche.getBook().getOptional_one())
+					.addParameter("author_nationality", fiche.getBook().getAuthor_nationality())
+					.addParameter("author_period", fiche.getBook().getAuthor_period())
+					.executeUpdate();
 
 			slf4jLogger.info("updated book");
 
@@ -325,25 +355,43 @@ public class Sql2oModel implements IModel {
 				if (comment.getSubmission_date() == null) {
 					slf4jLogger.info("updateFiche> we have a new comment!!!");
 					addComment(fiche.getBook().getBook_uuid(), comment.getAuthor(), comment.getAboutAuthor(),
-							comment.getAboutGenre(), comment.getAboutGenre(), comment.getAboutCharacters(),
-							comment.getResume(), comment.getExtrait(), comment.getAppreciation(),
-							comment.getIsCompleted(), comment.getOptional_one(), comment.getOptional_two());
+							comment.getAboutGenre(), 
+							comment.getAboutGenre(), 
+							comment.getAboutCharacters(),
+							comment.getResume(), 
+							comment.getExtrait(), 
+							comment.getAppreciation(),
+							comment.getIsCompleted(), 
+							comment.getOptional_one(), 
+							comment.getOptional_two(),
+							comment.getComment_text(), 
+							comment.getOther_details());
 				} else {
 					slf4jLogger.info("we have to update a comment !!!");
-					updateComment(fiche.getBook().getBook_uuid(), comment.getAuthor(), comment.getAboutAuthor(),
-							comment.getAboutGenre(), comment.getAboutGenre(), comment.getAboutCharacters(),
-							comment.getResume(), comment.getExtrait(), comment.getAppreciation(),
-							comment.getIsCompleted(), comment.getSubmission_date(), comment.getOptional_one(),
-							comment.getOptional_two());
+					updateComment(fiche.getBook().getBook_uuid(), 
+							comment.getAuthor(), 
+							comment.getAboutAuthor(),
+							comment.getAboutGenre(), 
+							comment.getAboutGenre(), 
+							comment.getAboutCharacters(),
+							comment.getResume(), 
+							comment.getExtrait(), 
+							comment.getAppreciation(),
+							comment.getIsCompleted(), 
+							comment.getSubmission_date(), 
+							comment.getOptional_one(),
+							comment.getOptional_two(),
+							comment.getComment_text(), 
+							comment.getOther_details());
 				}
 
 			}
 
-			slf4jLogger.info("updated comments success");
+			slf4jLogger.info("updateFiche> updated comments success");
 
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			slf4jLogger.info("Problem with DB connection");
+		} catch (Exception ex) {			
+			slf4jLogger.info("updateFiche> Cannot update fiche - exception caught:");
+			slf4jLogger.info(ex.getLocalizedMessage());
 		}
 
 		return true;

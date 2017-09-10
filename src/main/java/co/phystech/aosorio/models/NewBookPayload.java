@@ -19,7 +19,8 @@ public class NewBookPayload implements IValidable {
 	private int pages;
 	private String language;
 	private String translation;
-
+	private String author_nationality;
+	private String author_period;	
 	private String optional_one; 
 	private String optional_two;
 	
@@ -166,6 +167,41 @@ public class NewBookPayload implements IValidable {
 	public void setOptional_two(String optional_two) {
 		this.optional_two = optional_two;
 	}
+
+
+	/**
+	 * @return the author_nationality
+	 */
+	public String getAuthor_nationality() {
+		return author_nationality;
+	}
+
+
+	/**
+	 * @param author_nationality the author_nationality to set
+	 */
+	public void setAuthor_nationality(String author_nationality) {
+		this.author_nationality = author_nationality;
+	}
+
+
+	/**
+	 * @return the author_period
+	 */
+	public String getAuthor_period() {
+		return author_period;
+	}
+
+
+	/**
+	 * @param author_period the author_period to set
+	 */
+	public void setAuthor_period(String author_period) {
+		this.author_period = author_period;
+	}
+
+
+
 	
 	
 
