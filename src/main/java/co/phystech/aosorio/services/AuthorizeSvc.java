@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import co.phystech.aosorio.config.Constants;
 import spark.Request;
 import spark.Response;
 
@@ -36,27 +37,25 @@ public class AuthorizeSvc {
 		}
 		
 		String jsonResponse = "";
+		String serverPath = "";
 		
-		String route = "/auth/access/";
+		String route = Constants.DEFAULT_AUTH_ROUTE;
 		
-		String serverPath = "https://rugged-yosemite-61189.herokuapp.com";
-		//String serverPath = "http://localhost:4568";
-			
+		if (System.getenv("AUTHSVC_URL") != null) {
+			serverPath = System.getenv("AUTHSVC_URL");
+		} else
+			serverPath = Constants.DEFAULT_AUTH_SERVICE;
+				
 		pResponse.type("application/json");
 		
 		try {
 			
-			String header = pRequest.headers("Authorization");
+			String header = pRequest.headers(Constants.DEFAULT_AUTH_HEADER);
 			
-			if ( header == null | header.length() == 0) {
-				slf4jLogger.info("Arriving auth header is null"); 
-			} 
+			if ( header == null | header.length() == 0)
+				throw new NullPointerException();
 				
 			slf4jLogger.info("Arriving auth header: " + header);
-			
-			//String header = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJhbmRyZXMub3NvcmlvQG91dGxvb2suY29tIiwiaWF0IjoxNDk5MjA4Njk4LCJzdWIiOiJhbmRyZXMub3NvcmlvQG91dGxvb2suY29tIiwiaXNzIjoicGh5c3RlY2guY28iLCJleHAiOjE0OTk4MTM0OTgsImF1ZCI6ImFkbWluIn0.Jr244ugr8I6uDiMIabiDS5LjUTf0c6oRwdgj2d4Z0Rs";
-			//String header = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJhbmRyZXMub3NvcmlvQG91dGxvb2suY29tIiwiaWF0IjoxNDk5MjA4Njk4LCJzdWIiOiJhbmRyZXMub3NvcmlvQG91dGxvb2suY29tIiwiaXNzIjoicGh5c3RlY2guY28iLCJleHAiOjE0OTk4MTM0OTgsImF1ZCI6ImFkbWluIn0.Jr244ugr8I6uDiMIabiDS5LjUTf0c6oRwdgj2d4Z0Rs";
-			//String header = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJhbmRyZXMub3NvcmlvQG91dGxvb2suY29tIiwiaWF0IjoxNDk5Mzg4ODM3LCJzdWIiOiJhbmRyZXMub3NvcmlvQG91dGxvb2suY29tIiwiaXNzIjoicGh5c3RlY2guY28iLCJleHAiOjE0OTk5OTM2MzcsImF1ZCI6ImFkbWluIn0.PE6XyltcKPd-Js5vU7y9NzvhNlbIlChtQ5_R874nqfs";
 						
 			URL appUrl = new URL(serverPath + route);
 
@@ -95,25 +94,22 @@ public class AuthorizeSvc {
 				pResponse.status(200);
 			}
 			
-		} catch (ConnectException e) {
+		} catch (ConnectException ex) {
 			pResponse.status(500);
 			slf4jLogger.info("Problem in connection");
 			return "Not OK";
 			
-		} catch (NullPointerException e) {
+		} catch (NullPointerException ex) {
 			pResponse.status(401);
 			slf4jLogger.info("No token present in headers");
 			halt(401, "Not authorized");
-			return "Not OK";
-				
-		} catch (Exception e) {
+
+		} catch (Exception ex) {
 			pResponse.status(401);
+			slf4jLogger.info("Unconsidered exception " + ex.getLocalizedMessage());
 			halt(401, "Not authorized");
-			e.printStackTrace();
-			return "Not OK";
-	
 		}
-				
+
 		return "OK";
 
 	}

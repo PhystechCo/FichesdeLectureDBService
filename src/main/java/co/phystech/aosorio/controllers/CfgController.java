@@ -4,7 +4,6 @@
 package co.phystech.aosorio.controllers;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,6 +25,7 @@ public class CfgController {
 	private static String dbEnv;
 	private static String dbType;
 	private static String dbServerUrl;
+	private static String dbHost;
 	private static String dbPort;
 	private static String dbName;
 	private static String dbAddress;
@@ -49,20 +49,28 @@ public class CfgController {
 			// load a properties file
 			prop.load(input);
 
-			// get the property value and print it out
-			dbEnv = prop.getProperty("db.env");
+			// get the property value and print it ou/t
+			if (System.getenv("DBENV") != null) {
+				dbEnv = System.getenv("DBENV");
+			} else
+				dbEnv = prop.getProperty("db.env");
 			dbType = prop.getProperty("db.type");
 			dbName = prop.getProperty("db.name");
-			dbServerUrl = prop.getProperty("db.url");
+			dbHost = prop.getProperty("db.host");
 
+			dbServerUrl = prop.getProperty(dbType + ".url") + dbHost;
 			dbPort = prop.getProperty(dbType + ".port");
 			dbUser = prop.getProperty(dbType + ".user");
 			dbPass = prop.getProperty(dbType + ".pass");
 
-			if (dbEnv.equals("local")) {
-				setDbAddress(dbServerUrl + ":" + dbPort + "/" + dbName);
-			} else {
+			if (dbEnv.equals("aws")) {
+
 				getAwsConfig();
+
+			} else {
+
+				setDbAddress(dbServerUrl + ":" + dbPort + "/" + dbName);
+				slf4jLogger.info("Default dbAddress: " + this.getDbAddress());
 			}
 
 			dbReplicaSetIPs = prop.getProperty("mongo.db.replicasetips").split(",");
@@ -72,17 +80,11 @@ public class CfgController {
 				dbServerAdresses.add(new ServerAddress(ips, 27017));
 			}
 
-		} catch (FileNotFoundException ex) {
-			
-			getAwsConfig();
-			
 		} catch (IOException ex) {
-			
-			ex.printStackTrace();
-			dbEnv = "local";
-			dbServerUrl = "localhost";
-			dbPort = "27017";
-			dbName = "dbname";
+
+			slf4jLogger.info(ex.getMessage());
+			slf4jLogger.info("will use the default values");
+			setDefaultConfig();
 
 		} finally {
 			if (input != null) {
@@ -107,11 +109,24 @@ public class CfgController {
 
 			setDbAddress("jdbc:postgresql://" + dbServerUrl + ":" + dbPort + dbName + "?sslmode=require");
 
-			slf4jLogger.info(dbAddress);
+			slf4jLogger.debug(dbAddress);
 
 		} catch (Exception e) {
-			slf4jLogger.info("Problem extracting DatabaseURL info");
+			slf4jLogger.info(e.getMessage());
+			slf4jLogger.info("DatabaseURL configuration not available on host");
+			slf4jLogger.info("Will use the default values");
+			setDefaultConfig();
+			
 		}
+
+	}
+
+	private void setDefaultConfig() {
+
+		dbEnv = "local";
+		dbServerUrl = "jdbc:postgresql://localhost";
+		dbPort = "5432";
+		dbName = "fichedb";
 
 	}
 
@@ -235,6 +250,21 @@ public class CfgController {
 
 	public void setDbPass(String dbPass) {
 		CfgController.dbPass = dbPass;
+	}
+
+	/**
+	 * @return the dbHost
+	 */
+	public static String getDbHost() {
+		return dbHost;
+	}
+
+	/**
+	 * @param dbHost
+	 *            the dbHost to set
+	 */
+	public static void setDbHost(String dbHost) {
+		CfgController.dbHost = dbHost;
 	}
 
 }
