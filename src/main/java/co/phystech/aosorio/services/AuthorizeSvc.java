@@ -97,7 +97,7 @@ public class AuthorizeSvc {
 		} catch (ConnectException ex) {
 			pResponse.status(500);
 			slf4jLogger.info("Problem in connection");
-			return "Not OK";
+			halt(500, "Not authorized");
 			
 		} catch (NullPointerException ex) {
 			pResponse.status(401);
